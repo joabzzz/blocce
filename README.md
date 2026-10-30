@@ -84,7 +84,7 @@ cargo install --locked trunk
 trunk serve --open
 ```
 
-For deployment, run `trunk build --release` and serve the resulting `dist/` directory over HTTP(S), including its `assets/` directory. The relative URLs allow the build to be hosted under a subdirectory. A web app can embed a deployed build using an iframe:
+For deployment, run `trunk build --release --cargo-profile web-release --locked` and serve the resulting `dist/` directory over HTTP(S), including its `assets/` directory. The `web-release` profile optimizes the WASM binary for size while leaving native release builds unchanged. The relative URLs allow the build to be hosted under a subdirectory. A web app can embed a deployed build using an iframe:
 
 ```html
 <iframe src="https://example.com/blocce/" title="BLOCCE game"
@@ -100,7 +100,7 @@ To try the desktop bloom effect in a browser that supports WebGPU, build a separ
 ```bash
 trunk serve --release --features webgpu
 # Or produce a package in dist/:
-trunk build --release --features webgpu
+trunk build --release --cargo-profile web-release --locked --features webgpu
 ```
 
 This selects WebGPU instead of WebGL2 and does not fall back automatically on browsers without WebGPU. Use the default build for wider browser support. Motion blur remains disabled in both web builds.
