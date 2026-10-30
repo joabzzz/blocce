@@ -1,0 +1,262 @@
+# Blocce Game Configuration
+# Edit these values to experiment with game behavior, physics, and visuals
+
+# Game Rules Configuration
+game:
+  rounds_to_win: 4 # Best of 7 (first to 4 wins)
+  blocks_per_player: 3 # Number of blocks each player can throw per round
+
+  # State transition timing
+  settle_duration: 1.0 # Seconds blocks must be still before advancing
+  victory_display_duration: 5.0 # Seconds to show round winner
+  fade_in_duration: 0.4 # Seconds for blocks/UI to fade in (smooth appearance)
+  fade_out_duration: 1.5 # Seconds for blocks to fade out
+  match_complete_delay: 3.0 # Seconds before allowing restart
+
+# Physics Configuration
+physics:
+  # Global physics settings
+  gravity: -9.81 # m/s² (negative is down)
+  substeps: 12 # Physics simulation substeps (higher = more stable)
+  max_overlap_solve_speed: 5.0
+  restitution_iterations: 4
+
+  # Block physics properties
+  block:
+    mass: 5.0 # kg
+    friction: 0.7 # Surface friction (0.0 = ice, 1.0 = rubber)
+    restitution: 0.5 # Bounciness (0.0 = clay, 1.0 = superball)
+    linear_damping: 0.2 # Air resistance for movement
+    angular_damping: 0.5 # Air resistance for rotation
+    gravity_scale: 1.0 # Multiplier for gravity (1.0 = normal)
+    ccd_enabled: true # Continuous collision detection
+    disable_sleeping: true # Keep blocks always active
+
+  # Ground/arena surface properties
+  ground:
+    friction: 0.8 # Higher than blocks for more grip
+    restitution: 0.2 # Low bounce
+
+  # Settlement detection
+  settlement:
+    velocity_threshold: 0.3 # Linear velocity must be below this (m/s)
+    angular_velocity_threshold: 0.3 # Angular velocity must be below this (rad/s)
+
+# Throwing Mechanics Configuration
+throwing:
+  power_multiplier: 20.0 # Converts power (0.5-1.0) to velocity magnitude
+  charge_rate: 0.8 # Power increase per second while holding space
+  min_power: 0.5 # Minimum throw power
+  max_power: 1.0 # Maximum throw power
+
+  # Throw angles (degrees)
+  default_angle: 45.0 # Vertical throw angle (pitch)
+  min_angle: 15.0 # Future: minimum pitch angle
+  max_angle: 75.0 # Future: maximum pitch angle
+
+  # Horizontal aiming (degrees)
+  rotation_speed: 45.0 # Degrees per second for A/D rotation (slower = more precise)
+  min_rotation: -45.0 # Leftmost aim
+  max_rotation: 45.0 # Rightmost aim
+  default_rotation: 0.0 # Starting rotation
+
+# Arena/Map Configuration
+arena:
+  # Main ground platform
+  ground:
+    width: 30.0 # X dimension
+    height: 2.0 # Y dimension (thickness)
+    depth: 40.0 # Z dimension
+    y_position: -1.0 # Top surface at y=0
+
+  # Safety floor (catches falling blocks)
+  safety_floor:
+    width: 200.0
+    height: 1.0
+    depth: 200.0
+    y_position: -25.0
+
+  # Target block
+  target:
+    size: 0.3 # Cube size
+    y_position: 0.15 # Sits on ground surface
+    # Target position randomization (spawns at new location each round)
+    random_x_min: -10.0
+    random_x_max: 10.0
+    random_z_min: 5.0 # Minimum distance down the course
+    random_z_max: 15.0 # Maximum distance down the course
+
+  # Boundaries (blocks outside these are marked out of bounds)
+  boundaries:
+    x_max: 15.0 # ±X bounds
+    z_max: 20.0 # ±Z bounds
+    y_despawn_immediate: -5.0 # Instant despawn below this
+    y_despawn_cleanup: -20.0 # Cleanup threshold for OOB blocks
+    oob_despawn_velocity: 0.1 # OOB blocks despawn when slower than this
+
+  # Spawning positions
+  throwing_line:
+    x: 0.0
+    y: 2.0 # Height above ground
+    z: -15.0 # Starting position
+
+# Lighting Configuration
+lighting:
+  # Directional light (sun/moon)
+  directional:
+    color_r: 0.15
+    color_g: 0.2
+    color_b: 0.3
+    illuminance: 200.0 # lux
+    shadows_enabled: true
+    pitch: -1.0 # Rotation pitch
+    yaw: 0.5 # Rotation yaw
+
+  # Ambient light
+  ambient:
+    color_r: 0.01
+    color_g: 0.02
+    color_b: 0.05
+    brightness: 10.0
+
+  # Block point lights (attached to each thrown block)
+  block_light:
+    intensity: 300000.0 # lux (very bright)
+    radius: 5.0 # Light falloff start
+    range: 8.0 # Maximum light distance
+    shadows_enabled: true
+    # Color matches player color automatically
+
+# Rendering Configuration
+rendering:
+  # Background clear color
+  clear_color:
+    r: 0.01
+    g: 0.02
+    b: 0.05
+
+  # Bloom (glow) settings
+  bloom:
+    intensity: 0.2 # Overall bloom strength (halved from 0.4)
+    low_frequency_boost: 0.8
+    low_frequency_boost_curvature: 0.95
+    high_pass_frequency: 1.0
+
+  # Target block emissive glow
+  target_emissive:
+    r: 1.875
+    g: 1.875
+    b: 1.875
+
+  # Motion blur settings (helps smooth fast camera movement)
+  motion_blur:
+    shutter_angle: 1.0 # Motion blur strength (0.0 to 1.0, cinematic is 0.5)
+    samples: 16 # Quality (higher = smoother, 6*2+1 = 13 samples)
+
+# Camera Configuration
+camera:
+  # Initial position
+  initial:
+    x: 0.0
+    y: 15.0
+    z: -18.0
+    look_at_x: 0.0
+    look_at_y: 0.0
+    look_at_z: 0.0
+
+  # Dynamic camera movement
+  orbit:
+    center_x: 0.0 # Camera orbits around throwing line
+    center_y: 0.0
+    center_z: -15.0
+    distance: 8.0 # Distance from center
+    height: 12.0 # Height above ground
+    look_distance: 15.0 # Distance ahead for look target
+    interpolation_speed: 5.0 # Camera smoothing (higher = faster)
+
+  # Manual controls
+  manual:
+    move_speed: 10.0 # Units per second for arrow keys
+    height_adjust_speed: 5.0 # Units per second for W/S
+
+# Player Configuration
+players:
+  - name: "Player 1"
+    color:
+      r: 1.0
+      g: 0.3
+      b: 0.0
+    emissive:
+      r: 1.75
+      g: 0.525
+      b: 0.0
+
+  - name: "Player 2"
+    color:
+      r: 0.0
+      g: 0.4
+      b: 1.0
+    emissive:
+      r: 0.0
+      g: 0.7
+      b: 2.1875
+
+# Animation Configuration
+animation:
+  # Victory animation (winner supernova, losers dim)
+  victory:
+    winner_brightness_multiplier: 4.0 # 400% brightness (4x supernova!)
+    loser_brightness_multiplier: 0.01 # 1% brightness (very dim)
+
+  # Fade out animation
+  fade:
+    start_alpha: 1.0
+    end_alpha: 0.0
+
+# UI Configuration
+ui:
+  # Text styling (uses default Bevy font)
+  score_text:
+    size: 20.0
+    color_r: 1.0
+    color_g: 1.0
+    color_b: 1.0
+
+  game_text:
+    size: 12.0
+    color_r: 1.0
+    color_g: 1.0
+    color_b: 1.0
+
+  match_winner_text:
+    size: 36.0 # 3x larger than game text for big victory message
+    color_r: 1.0
+    color_g: 1.0
+    color_b: 1.0
+
+  controls_text:
+    size: 8.0
+    color_r: 0.7
+    color_g: 0.7
+    color_b: 0.7
+
+  # Text positioning
+  score_margin: 20.0 # Pixels from edge
+  controls_bottom_margin: 20.0
+
+# Input Configuration
+input:
+  # Keyboard mappings (for future rebinding support)
+  aim_left: "KeyA"
+  aim_right: "KeyD"
+  throw: "Space"
+  camera_forward: "ArrowUp"
+  camera_back: "ArrowDown"
+  camera_up: "KeyW"
+  camera_down: "KeyS"
+
+  # Future: for spin/pitch controls
+  spin_left: "KeyQ"
+  spin_right: "KeyE"
+  pitch_up: "KeyW"
+  pitch_down: "KeyS"

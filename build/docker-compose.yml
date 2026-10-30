@@ -1,0 +1,26 @@
+services:
+  ci:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile.ci
+    volumes:
+      - ..:/workspace
+      - cargo-cache:/usr/local/cargo/registry
+      - cargo-git-cache:/usr/local/cargo/git
+    environment:
+      - CARGO_TERM_COLOR=always
+
+  windows:
+    build:
+      context: ..
+      dockerfile: build/Dockerfile.windows
+    volumes:
+      - ..:/workspace
+      - cargo-cache:/usr/local/cargo/registry
+      - cargo-git-cache:/usr/local/cargo/git
+    environment:
+      - CARGO_TERM_COLOR=always
+
+volumes:
+  cargo-cache:
+  cargo-git-cache:

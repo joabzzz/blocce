@@ -1,0 +1,108 @@
+name: Publish Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  macos-release:
+    name: macOS Universal
+    runs-on: macos-14
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-apple-darwin,aarch64-apple-darwin
+
+      - name: Build macOS release
+        run: bash build/macos-release.sh
+
+      - name: Upload packaged artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dist
+          path: dist/Blocce-*.dmg
+
+  windows-release:
+    name: Windows x64
+    runs-on: windows-latest
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Build Windows release
+        shell: bash
+        run: bash build/windows-release.sh
+
+      - name: Upload packaged artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-dist
+          path: dist/Blocce-*-x64.zip
+
+  publish:
+    name: Publish GitHub release
+    runs-on: ubuntu-latest
+    needs:
+      - macos-release
+      - windows-release
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Flatten artifact directory
+        run: |
+          find dist -mindepth 2 -type f -exec mv {} dist \;
+          find dist -mindepth 1 -type d -empty -delete
+
+      - name: Ensure tomli backport
+        run: python -m pip install --upgrade tomli
+
+      - name: Read project version
+        id: version
+        run: |
+          python - <<'PY'
+          import os
+          import pathlib
+
+          try:
+              import tomllib as toml
+          except ModuleNotFoundError:
+              import tomli as toml
+
+          data = toml.loads(pathlib.Path("Cargo.toml").read_text())
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+              fh.write(f"version={data['package']['version']}\n")
+          PY
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version.outputs.version }}-build-${{ github.run_number }}
+          name: Release ${{ steps.version.outputs.version }} (build ${{ github.run_number }})
+          draft: false
+          prerelease: false
+          files: dist/*
+          generate_release_notes: true

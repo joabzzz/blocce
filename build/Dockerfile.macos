@@ -1,0 +1,14 @@
+FROM rust:1.89
+
+# Install cross-compilation tools for macOS
+# Note: This is a placeholder - true macOS builds require macOS hardware
+# For actual builds, use GitHub Actions with macos-14 runner
+
+RUN apt-get update && apt-get install -y \
+    clang \
+    libssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+
+CMD ["echo", "macOS builds require macOS hardware. Use GitHub Actions or run locally on macOS."]
