@@ -39,20 +39,29 @@ fn main() {
 
     let mut app = App::new();
 
-    app.add_plugins(DefaultPlugins.set(WindowPlugin {
-        primary_window: Some(Window {
-            title: "blocce".to_string(),
-            resolution: (1280, 720).into(),
-            #[cfg(target_arch = "wasm32")]
-            canvas: Some("#blocce-canvas".into()),
-            #[cfg(target_arch = "wasm32")]
-            fit_canvas_to_parent: true,
-            #[cfg(target_arch = "wasm32")]
-            prevent_default_event_handling: false,
-            ..default()
-        }),
-        ..default()
-    }))
+    app.add_plugins(
+        DefaultPlugins
+            .set(bevy::asset::AssetPlugin {
+                // Static hosts may return their HTML fallback for missing .meta files.
+                #[cfg(target_arch = "wasm32")]
+                meta_check: bevy::asset::AssetMetaCheck::Never,
+                ..default()
+            })
+            .set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "blocce".to_string(),
+                    resolution: (1280, 720).into(),
+                    #[cfg(target_arch = "wasm32")]
+                    canvas: Some("#blocce-canvas".into()),
+                    #[cfg(target_arch = "wasm32")]
+                    fit_canvas_to_parent: true,
+                    #[cfg(target_arch = "wasm32")]
+                    prevent_default_event_handling: false,
+                    ..default()
+                }),
+                ..default()
+            }),
+    )
     .add_plugins(PhysicsPlugins::default().with_length_unit(1.0));
 
     // Initialize resources from config
