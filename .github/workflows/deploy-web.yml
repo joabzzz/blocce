@@ -1,0 +1,41 @@
+name: Deploy web
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: blocce-web-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and deploy to Cloudflare Pages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Trunk
+        run: cargo install --locked trunk --version 0.21.14
+      - name: Build browser package
+        run: |
+          trunk build --release --cargo-profile web-release --locked
+          wasm_file=$(find dist -maxdepth 1 -name "*_bg.wasm" -type f)
+          test -n "$wasm_file"
+          test "$(wc -c < "$wasm_file")" -le 26214400
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: 2199dcfd7288b6fe616daed952840efd
+          wranglerVersion: '4.151.0'
+          command: pages deploy dist --project-name=blocce --branch=main

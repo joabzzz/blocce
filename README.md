@@ -84,7 +84,7 @@ cargo install --locked trunk
 trunk serve --open
 ```
 
-For deployment, run `trunk build --release --cargo-profile web-release --locked` and serve the resulting `dist/` directory over HTTP(S), including its `assets/` directory. The `web-release` profile optimizes the WASM binary for size while leaving native release builds unchanged. The relative URLs allow the build to be hosted under a subdirectory. A web app can embed a deployed build using an iframe:
+For deployment, run `trunk build --release --cargo-profile web-release --locked` and serve the resulting `dist/` directory over HTTP(S), including its `assets/` directory. The `web-release` profile optimizes the WASM binary for size while leaving native release builds unchanged. The GitHub Actions web deployment builds pushes to `main` and deploys to the `blocce` Cloudflare Pages project; it requires the `CLOUDFLARE_API_TOKEN` repository secret with Pages Edit access. The relative URLs allow the build to be hosted under a subdirectory. A web app can embed a deployed build using an iframe:
 
 ```html
 <iframe src="https://example.com/blocce/" title="BLOCCE game"
